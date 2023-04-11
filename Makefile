@@ -41,7 +41,7 @@ clean:
 
 .PHONY: build
 build:
-	poetry run dinesafe-toronto doorsopen-toronto scrape-data doorsopen.db
+	poetry run doorsopen-toronto scrape-data doorsopen.db
 
 .PHONY: datasette
 datasette: doorsopen.db

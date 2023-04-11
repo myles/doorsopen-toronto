@@ -13,7 +13,7 @@ The `scrape-data` command will scrape the DoorsOpen JSON data and save it to a
 SQLite database.
 
 ```console
-foo@bar:~$ poetry run doorsopen-toronto scrape-data dinesafe.db
+foo@bar:~$ poetry run doorsopen-toronto scrape-data doorsopen.db
 ```
 
 ## Develop
