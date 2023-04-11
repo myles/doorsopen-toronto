@@ -1,6 +1,6 @@
 # DoorsOpen Toronto
 
-A [datasette][datasette] of the City of Toronto's] [DoorsOpen][doorsopen] data.
+A [datasette][datasette] of the City of Toronto's [DoorsOpen][doorsopen] data.
 
 [datasette]: https://datasette.io/
 [doorsopen]: https://www.toronto.ca/explore-enjoy/festivals-events/doors-open-toronto/
