@@ -13,6 +13,7 @@ def get_doorsoepn_dataset_url(package_id: str) -> str:
     response = requests.get(
         url="https://ckan0.cf.opendata.inter.prod-toronto.ca/api/3/action/package_show",
         params={"id": package_id},
+        timeout=(5, 30),
     )
     response.raise_for_status()
     data = response.json()
@@ -33,7 +34,7 @@ def get_doors_open_dataset(url: str) -> List[Dict[str, Any]]:
     """
     Get the individual DoorsOpen dataset.
     """
-    response = requests.get(url)
+    response = requests.get(url, timeout=(5, 30))
     response.raise_for_status()
     return response.json()
 
