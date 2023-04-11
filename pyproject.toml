@@ -17,6 +17,7 @@ sqlite-utils = "^3.30"
 doorsopen-toronto = "opendata_toronto_doors_open.cli:cli"
 
 [tool.poetry.group.dev.dependencies]
+bandit = {extras = ["toml"], version = "^1.7.5"}
 black = "^23.3.0"
 isort = "^5.12.0"
 mypy = "^1.2.0"
