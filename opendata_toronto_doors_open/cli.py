@@ -4,15 +4,24 @@ from sqlite_utils.db import Table
 from . import service
 
 
-@click.command()
+@click.group()
+@click.version_option()
+def cli():
+    """
+    Save data from Toronto's DoorsOpen into a SQLite database.
+    """
+
+
+@cli.command()
 @click.argument(
     "db_path",
     type=click.Path(file_okay=True, dir_okay=False, allow_dash=False),
     required=True,
 )
-def cli(db_path):
+def scrape_data(db_path):
     """
-    Save data from Toronto's OpenDoors into a SQLite database.
+    Scrape Toronto's DoorsOpen buildings datasets and save it to a SQLite
+    database.
     """
     db = service.open_database(db_path)
     buildings_table: Table = db.table("buildings")  # type: ignore
