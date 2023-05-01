@@ -1,0 +1,94 @@
+name: Deploy
+
+"on":
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+  schedule:
+    - cron: "0 13 * * *" # Every day at 1pm UTC
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - id: checkout
+        name: "Checkout 🛎"
+        uses: actions/checkout@v2
+
+      - id: setup-python
+        name: "Setup Python ${{ matrix.python-version }} 🏗"
+        uses: actions/setup-python@v1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - id: setup-poetry
+        name: "Setup Poetry 📝"
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+
+      - id: get-cache-poetry-directory
+        name: "Get poetry's cache directory 🔎"
+        run: |
+          echo "::set-output name=dir::$(poetry config cache-dir)"
+
+      - id: cache-poetry-directory
+        name: "Cache poetry 📦"
+        uses: actions/cache@v3.0.11
+        with:
+          path: ${{ steps.get-cache-poetry-directory.outputs.dir }}
+          key: ${{ runner.os }}-poetry-${{ hashFiles('poetry.lock') }}
+          restore-keys: ${{ runner.os }}-poetry-
+
+      - id: install-dependencies
+        name: "Install dependencies 👨🏻‍💻"
+        run: make setup
+
+      - id: cache-database
+        name: "Cache doorsopen.db 📦"
+        uses: actions/cache@v3.0.11
+        with:
+          path: doorsopen.db
+          key: doorsopen-db
+
+      - id: build-database
+        name: "Build the database 🗂️"
+        run: make build
+
+      - id: deploy
+        name: "Deploy datasets to Vercel 🚀"
+        env:
+          VERCEL_PROJECT: ${{ secrets.VERCEL_PROJECT }}
+          VERCEL_SCOPE: ${{ secrets.VERCEL_SCOPE }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |-
+          poetry run datasette publish vercel doorsopen.db \
+            --metadata metadata.json \
+            --token $VERCEL_TOKEN \
+            --project $VERCEL_PROJECT \
+            --scope $VERCEL_SCOPE \
+            --install datasette-sentry \
+            --install datasette-block-robots \
+            --install datasette-dashboards \
+            --install datasette-gzip
+
+      - id: sentry-release
+        name: "✍️ Create a release in Sentry"
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG_NAME }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production
+          ignore_empty: true
+
+      - id: heartbeat
+        name: "⏲️ Send Heartbeat"
+        env:
+          BETTER_UPTIME_HEARTBEAT_ID: ${{ secrets.BETTER_UPTIME_HEARTBEAT_ID }}
+        run: |-
+          curl -X POST \
+            "https://betteruptime.com/api/v1/heartbeat/$BETTER_UPTIME_HEARTBEAT_ID"
